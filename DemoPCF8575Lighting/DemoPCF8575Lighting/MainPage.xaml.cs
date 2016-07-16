@@ -53,7 +53,7 @@ namespace DemoPCF8575Lighting
                 var i2cSettings = new I2cConnectionSettings(0x20); //no additional bits
                 i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
                 m_i2cPCF8575 = i2cController.GetDevice(i2cSettings);
-                m_i2cPCF8575.Write(new byte[] { 0x00, 0x00 });//All pins as input; no interrupt
+                m_i2cPCF8575.Write(new byte[] { 0x01, 0x00 });//0 - as output; Other pins as input; no interrupt
                 m_timer = new DispatcherTimer();
                 m_timer.Interval = TimeSpan.FromMilliseconds(500);
                 m_timer.Tick += M_timer_Tick;
@@ -64,12 +64,17 @@ namespace DemoPCF8575Lighting
             }
             
         }
-
+        bool m_switch = false;
         private void M_timer_Tick(object sender, object e)
         {
             byte[] arr = new byte[2];
             m_i2cPCF8575.Read(arr);
             Debug.WriteLine($"{arr[0]},{arr[1]}");
+            if (m_switch)
+                m_i2cPCF8575.Write(new byte[] { 0x01, 0x00 });
+            else
+                m_i2cPCF8575.Write(new byte[] { 0x00, 0x00 });
+            m_switch = !m_switch;
         }
     }
 }
